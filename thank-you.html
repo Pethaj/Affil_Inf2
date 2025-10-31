@@ -505,23 +505,23 @@
                         <label>Jak velký je váš dosah?</label>
                         <div class="checkbox-group">
                             <div class="checkbox-item">
-                                <input type="radio" id="network-zacatecnik" name="network-size" value="zacatecnik" required>
+                                <input type="radio" id="network-zacatecnik" name="network-size" value="0-50" required>
                                 <label for="network-zacatecnik" class="checkbox-label">0-50 kontaktů</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="radio" id="network-mala" name="network-size" value="mala" required>
+                                <input type="radio" id="network-mala" name="network-size" value="50-200" required>
                                 <label for="network-mala" class="checkbox-label">50-200 kontaktů</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="radio" id="network-stredni" name="network-size" value="stredni" required>
+                                <input type="radio" id="network-stredni" name="network-size" value="200-1000" required>
                                 <label for="network-stredni" class="checkbox-label">200-1000 kontaktů</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="radio" id="network-velka" name="network-size" value="velka" required>
+                                <input type="radio" id="network-velka" name="network-size" value="1000-5000" required>
                                 <label for="network-velka" class="checkbox-label">1000-5000 kontaktů</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="radio" id="network-velmi-velka" name="network-size" value="velmi-velka" required>
+                                <input type="radio" id="network-velmi-velka" name="network-size" value="5000+" required>
                                 <label for="network-velmi-velka" class="checkbox-label">5000+ kontaktů</label>
                             </div>
                         </div>
@@ -659,7 +659,7 @@
                     <button type="submit" class="btn">Odeslat formulář</button>
                     
                     <p style="text-align: center; margin-top: 20px; font-size: 15px; color: rgba(255,255,255,0.8); font-style: italic; line-height: 1.6;">
-                        (Po odeslání formuláře vám vytvoříme účet a zašleme přístupové údaje. O vše ostatní se postaráme my.)
+                        (Po odeslání formuláře vám vytvoříme účet a zašleme přístupové údaje. O vše ostatní se postaráme my).
                     </p>
                 </form>
             </div>
@@ -757,25 +757,94 @@
         }
 
         // === SYSTÉM ID ZÁKAZNÍKA ===
+        // KONFIGURACE LANDING PAGE
+        const LANDING_PAGE_CODE = 'AFMLM'; // Unikátní 5-znakový kód pro tento landing page
+        const SUBTAG = 'INF';              // Specifický subtag pro tuto verzi/variantu
+        
+        // Generování unikátního ID zákazníka s novou strukturou
+        // Formát: customer_[LANDING_PAGE_CODE]_[SUBTAG]_[TIMESTAMP]_[RANDOM1]_[RANDOM2]
+        function generateCustomerId() {
+            // 1. Timestamp v base36 formátu
+            const timestamp = Date.now().toString(36);
+            
+            // 2. První náhodný řetězec (9 znaků, bez prvních 2 znaků)
+            const random1 = Math.random().toString(36).substr(2, 9);
+            
+            // 3. Druhý náhodný řetězec (6 znaků, bez prvních 2 znaků)
+            const random2 = Math.random().toString(36).substr(2, 6);
+            
+            // Sestavení finálního ID
+            const customerId = `customer_${LANDING_PAGE_CODE}_${SUBTAG}_${timestamp}_${random1}_${random2}`;
+            
+            console.log('🆕 Nové Customer ID vygenerováno:', customerId);
+            console.log('📋 Struktura:', {
+                landingPageCode: LANDING_PAGE_CODE,
+                subtag: SUBTAG,
+                timestamp: timestamp,
+                random1: random1,
+                random2: random2
+            });
+            
+            return customerId;
+        }
+        
+        // Validace formátu existujícího ID
+        function isValidCustomerId(customerId) {
+            if (!customerId || typeof customerId !== 'string') {
+                return false;
+            }
+            
+            // Kontrola, zda ID obsahuje správný LANDING_PAGE_CODE a SUBTAG
+            const expectedPrefix = `customer_${LANDING_PAGE_CODE}_${SUBTAG}_`;
+            
+            if (!customerId.startsWith(expectedPrefix)) {
+                console.log('⚠️ Neplatné ID - neobsahuje správný kód/subtag:', customerId);
+                return false;
+            }
+            
+            // Kontrola základní struktury (mělo by mít 6 částí oddělených _)
+            const parts = customerId.split('_');
+            if (parts.length < 6) { // customer + CODE + SUBTAG + timestamp + random1 + random2
+                console.log('⚠️ Neplatné ID - nesprávná struktura:', customerId);
+                return false;
+            }
+            
+            return true;
+        }
+        
         function getCustomerId() {
             // Zkusíme získat ID z URL parametrů
             const urlParams = new URLSearchParams(window.location.search);
             let customerId = urlParams.get('customerId');
             
+            console.log('🔍 Kontrola Customer ID z URL:', customerId || 'nenalezeno');
+            
+            // Validace ID z URL
+            if (customerId && !isValidCustomerId(customerId)) {
+                console.log('🗑️ ID z URL je neplatné, bude ignorováno');
+                customerId = null;
+            }
+            
             // Pokud není v URL, zkusíme localStorage
             if (!customerId) {
                 customerId = localStorage.getItem('bewitCustomerId');
+                console.log('🔍 Kontrola Customer ID z localStorage:', customerId || 'nenalezeno');
+                
+                // Validace ID z localStorage
+                if (customerId && !isValidCustomerId(customerId)) {
+                    console.log('🗑️ Staré/neplatné ID odstraněno z localStorage');
+                    localStorage.removeItem('bewitCustomerId');
+                    customerId = null;
+                }
             }
             
-            // Pokud stále nemáme ID, vygenerujeme nové (záložní řešení)
+            // Pokud stále nemáme platné ID, vygenerujeme nové
             if (!customerId) {
-                const timestamp = Date.now().toString(36);
-                const random = Math.random().toString(36).substr(2, 9);
-                customerId = `customer_${timestamp}_${random}`;
+                customerId = generateCustomerId();
                 localStorage.setItem('bewitCustomerId', customerId);
-                console.log('Nové záložní ID zákazníka vygenerováno:', customerId);
+                console.log('💾 Nové ID uloženo do localStorage');
             } else {
-                console.log('ID zákazníka na děkovné stránce:', customerId);
+                console.log('✅ Platné Customer ID načteno:', customerId);
             }
             
             return customerId;
@@ -866,6 +935,17 @@
                 ];
                 const resultIndex = parseInt(data['expected-result']) - 1;
                 data['expected-result-text'] = resultRanges[resultIndex];
+            }
+            
+            // Zpracování pole "Jiné" - pokud je vyplněný text, nahradíme "jine" textem s prefixem "Jiné:"
+            if (data['promotion-other-text'] && data['promotion-other-text'].trim() !== '') {
+                if (data['promotion'] && Array.isArray(data['promotion'])) {
+                    // Najdeme index hodnoty "jine" a nahradíme ji textem s prefixem "Jiné:"
+                    const jineIndex = data['promotion'].indexOf('jine');
+                    if (jineIndex !== -1) {
+                        data['promotion'][jineIndex] = 'Jiné: ' + data['promotion-other-text'].trim();
+                    }
+                }
             }
             
             // Debug log pro ověření dat

@@ -2015,24 +2015,82 @@
     // GENEROVÁNÍ A SPRÁVA ID ZÁKAZNÍKA
     // ===========================================
     
-    // Generování unikátního ID zákazníka
+    // KONFIGURACE LANDING PAGE
+    const LANDING_PAGE_CODE = 'AFMLM'; // Unikátní 5-znakový kód pro tento landing page
+    const SUBTAG = 'INF';              // Specifický subtag pro tuto verzi/variantu
+    
+    // Generování unikátního ID zákazníka s novou strukturou
+    // Formát: customer_[LANDING_PAGE_CODE]_[SUBTAG]_[TIMESTAMP]_[RANDOM1]_[RANDOM2]
     function generateCustomerId() {
-        // Kombinace timestamp a náhodného čísla pro jedinečnost
+        // 1. Timestamp v base36 formátu
         const timestamp = Date.now().toString(36);
-        const random = Math.random().toString(36).substr(2, 9);
-        return `customer_${timestamp}_${random}`;
+        
+        // 2. První náhodný řetězec (9 znaků, bez prvních 2 znaků)
+        const random1 = Math.random().toString(36).substr(2, 9);
+        
+        // 3. Druhý náhodný řetězec (6 znaků, bez prvních 2 znaků)
+        const random2 = Math.random().toString(36).substr(2, 6);
+        
+        // Sestavení finálního ID
+        const customerId = `customer_${LANDING_PAGE_CODE}_${SUBTAG}_${timestamp}_${random1}_${random2}`;
+        
+        console.log('🆕 Nové Customer ID vygenerováno:', customerId);
+        console.log('📋 Struktura:', {
+            landingPageCode: LANDING_PAGE_CODE,
+            subtag: SUBTAG,
+            timestamp: timestamp,
+            random1: random1,
+            random2: random2
+        });
+        
+        return customerId;
+    }
+    
+    // Validace formátu existujícího ID
+    function isValidCustomerId(customerId) {
+        if (!customerId || typeof customerId !== 'string') {
+            return false;
+        }
+        
+        // Kontrola, zda ID obsahuje správný LANDING_PAGE_CODE a SUBTAG
+        const expectedPrefix = `customer_${LANDING_PAGE_CODE}_${SUBTAG}_`;
+        
+        if (!customerId.startsWith(expectedPrefix)) {
+            console.log('⚠️ Neplatné ID - neobsahuje správný kód/subtag:', customerId);
+            return false;
+        }
+        
+        // Kontrola základní struktury (mělo by mít 5 částí oddělených _)
+        const parts = customerId.split('_');
+        if (parts.length < 6) { // customer + CODE + SUBTAG + timestamp + random1 + random2
+            console.log('⚠️ Neplatné ID - nesprávná struktura:', customerId);
+            return false;
+        }
+        
+        return true;
     }
     
     // Získání nebo vytvoření ID zákazníka
     function getOrCreateCustomerId() {
         let customerId = localStorage.getItem('bewitCustomerId');
         
+        // Kontrola existence a validity ID
+        if (customerId) {
+            if (isValidCustomerId(customerId)) {
+                console.log('✅ Existující platné ID načteno:', customerId);
+                return customerId;
+            } else {
+                console.log('🗑️ Staré/neplatné ID odstraněno:', customerId);
+                localStorage.removeItem('bewitCustomerId');
+                customerId = null;
+            }
+        }
+        
+        // Vytvoření nového ID
         if (!customerId) {
             customerId = generateCustomerId();
             localStorage.setItem('bewitCustomerId', customerId);
-            console.log('Nové ID zákazníka vygenerováno:', customerId);
-        } else {
-            console.log('Existující ID zákazníka načteno:', customerId);
+            console.log('💾 Nové ID uloženo do localStorage');
         }
         
         return customerId;
