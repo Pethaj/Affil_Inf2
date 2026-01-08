@@ -95,3 +95,5 @@ sed -i '' 's/>Zistiť viac</>Tudj meg többet</g' "$FILE"
 echo "Maďarský překlad (1/3) hotov!"
 
 
+
+

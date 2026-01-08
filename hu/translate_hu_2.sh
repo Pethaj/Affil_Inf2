@@ -98,3 +98,5 @@ sed -i '' 's/transparentne a včas/átláthatóan és időben/g' "$FILE"
 echo "Maďarský překlad (2/3) hotov!"
 
 
+
+

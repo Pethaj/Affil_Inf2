@@ -206,3 +206,5 @@ sed -i '' '/clickDate: formatClickDate(),/a\
 echo "HU index.html technicky připraven!"
 
 
+
+

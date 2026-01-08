@@ -189,3 +189,5 @@ sed -i '' '/<\/script>/a\
 echo "HU thank-you.html technicky připraven!"
 
 
+
+
