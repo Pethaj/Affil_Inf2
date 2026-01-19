@@ -1018,6 +1018,9 @@
             // Přidání data odeslání formuláře
             data.clickDate = formatClickDate();
             
+            // Přidání country kódu
+            data.country = 'ro';
+            
             // Přidání tagů - rozlišíme zdroj podle toho, zda máme data z coffee formuláře
             const coffeeFormData = localStorage.getItem('coffeeFormData');
             if (coffeeFormData) {

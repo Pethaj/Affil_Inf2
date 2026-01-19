@@ -20,6 +20,7 @@
     <link rel="alternate" hreflang="hu" href="https://bewit.love/hu/Afill_Inf2/thank-you.html">
     <link rel="alternate" hreflang="ro" href="https://bewit.love/ro/Afill_Inf2/thank-you.html">
     <link rel="alternate" hreflang="pl" href="https://bewit.love/pl/Afill_Inf2/thank-you.html">
+    <link rel="alternate" hreflang="en" href="https://bewit.love/en/Afill_Inf2/thank-you.html">
     <link rel="alternate" hreflang="x-default" href="https://bewit.love/Afill_Inf2/thank-you.html">
     
     <!-- Open Graph -->
@@ -614,6 +615,8 @@
                 <a href="./sk/thank-you.html">🇸🇰 Slovenčina</a>
                 <a href="./ro/thank-you.html">🇷🇴 Română</a>
                 <a href="./pl/thank-you.html">🇵🇱 Polski</a>
+                <a href="./en/thank-you.html">🇬🇧 English</a>
+                <a href="./de/thank-you.html">🇩🇪 Deutsch</a>
             </div>
         </div>
     </div>
@@ -1020,6 +1023,9 @@
             
             // Přidání data odeslání formuláře
             data.clickDate = formatClickDate();
+            
+            // Přidání country kódu
+            data.country = 'cz';
             
             // Přidání tagů - rozlišíme zdroj podle toho, zda máme data z coffee formuláře
             const coffeeFormData = localStorage.getItem('coffeeFormData');

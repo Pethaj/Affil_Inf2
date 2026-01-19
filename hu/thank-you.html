@@ -1157,6 +1157,9 @@
             // Přidání data odeslání formuláře
             data.clickDate = formatClickDate();
             
+            // Přidání country kódu
+            data.country = 'hu';
+            
             // Tagek hozzáadása - forrás megkülönböztetése aszerint, hogy van-e adatunk a coffee űrlapból
             const coffeeFormData = localStorage.getItem('coffeeFormData');
             if (coffeeFormData) {
