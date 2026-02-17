@@ -511,6 +511,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             }
         }
 
+        /* === ANIMACE PRO VALIDACI === */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
         /* === JAZYKOVÝ PŘEPÍNAČ (DROPDOWN) === */
         .language-switcher {
             position: absolute;
@@ -665,7 +672,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="survey-form">
                 <h2>Dotazník pro nové partnery</h2>
                 <p style="font-size: 20px; margin-bottom: 30px;">Každý partner je pro nás jedinečný. Proto bychom rádi věděli, jakým způsobem chcete sdílet BEWIT produkty a co vám v tom máme usnadnit. Díky tomu vám dokážeme připravit přesně takové nástroje, podporu a podklady, které využijete nejlépe.</p>
-                <form id="affiliate-survey" method="POST" action="https://n8n.srv980546.hstgr.cloud/webhook/54cf0574-1c72-4add-bd7c-8fb60293dad5">
+                <form id="affiliate-survey" method="POST" action="https://n8n.srv980546.hstgr.cloud/webhook/54cf0574-1c72-4add-bd7c-8fb60293dad5" novalidate>
                     
                     <!-- Profese -->
                     <div class="form-group">
@@ -1056,9 +1063,82 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             return `${day}.${month}.${year}`;
         }
 
+        // === VALIDACE FORMULÁŘE ===
+        function validateForm() {
+            const errors = [];
+            
+            // 1. Kontrola profese (textové pole)
+            const profession = document.getElementById('profession');
+            if (!profession || profession.value.trim() === '') {
+                errors.push({
+                    field: profession,
+                    message: 'Prosím vyplňte informace o sobě'
+                });
+            }
+            
+            // 2. Kontrola velikosti sítě (radio buttons)
+            const networkSize = document.querySelector('input[name="network-size"]:checked');
+            if (!networkSize) {
+                errors.push({
+                    field: document.querySelector('input[name="network-size"]'),
+                    message: 'Prosím vyberte velikost vašeho dosahu'
+                });
+            }
+            
+            // 3. Kontrola způsobu propagace (checkboxy - alespoň jeden)
+            const promotion = document.querySelectorAll('input[name="promotion[]"]:checked');
+            if (promotion.length === 0) {
+                errors.push({
+                    field: document.querySelector('input[name="promotion[]"]'),
+                    message: 'Prosím vyberte alespoň jeden způsob šíření'
+                });
+            }
+            
+            // 4. Kontrola času pro volání (textové pole)
+            const callTime = document.getElementById('call-time');
+            if (!callTime || callTime.value.trim() === '') {
+                errors.push({
+                    field: callTime,
+                    message: 'Prosím uveďte, kdy vám můžeme zavolat'
+                });
+            }
+            
+            return errors;
+        }
+
         // === FORMULÁŘ ODESLÁNÍ ===
         document.getElementById('affiliate-survey').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Validace formuláře
+            const errors = validateForm();
+            if (errors.length > 0) {
+                // Zobrazit chybovou zprávu
+                const firstError = errors[0];
+                showErrorMessage(firstError.message);
+                
+                // Posunout na první chybné pole
+                if (firstError.field) {
+                    firstError.field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Zvýraznit sekci s chybou
+                    const formGroup = firstError.field.closest('.form-group');
+                    if (formGroup) {
+                        formGroup.style.animation = 'shake 0.5s';
+                        formGroup.style.border = '2px solid #dc3545';
+                        formGroup.style.borderRadius = '8px';
+                        formGroup.style.padding = '10px';
+                        
+                        setTimeout(() => {
+                            formGroup.style.animation = '';
+                            formGroup.style.border = '';
+                            formGroup.style.padding = '';
+                        }, 2000);
+                    }
+                }
+                
+                return false;
+            }
             
             const formData = new FormData(this);
             
